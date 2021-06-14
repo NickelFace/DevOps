@@ -75,3 +75,7 @@ https://stackoverflow.com/questions/52586941/got-an-error-zone-resource-pool-exh
 
 введи команду:
 packer validate -var-file=vars.json template.json
+Она должна вывести на экран что-то наподобие:
+Template validated successfully.
+Эта команда запустит сборку твоего образа:
+packer build -var-file=vars.json template.json
