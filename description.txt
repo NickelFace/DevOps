@@ -1,0 +1,77 @@
+СОБИРАЕМ ОБРАЗ ЛОКАЛЬНО
+
+Устанавливаем VirtualBox:
+https://www.virtualbox.org/wiki/Downloads
+Устанавливаем Packer:
+https://packer.io/downloads.html
+
+Автоматизация подготовки образа происходит следующим образом:
+https://www.debian.org/releases/stretch/mips/apbs02.html.ru
+
+В подготовке учавствует docker:
+https://docs.docker.com/engine/install/debian/
+Здесь подробнейшая документация для него.
+
+Готовим 3 файла:
+debian9-config.json
+docker_nginx.sh
+Folder: http
+preseed.cfg
+
+Проверка конфигурации:
+
+packer validate debian9-config.json
+Ты должен увидеть:
+Template validated successfully.
+
+Если нету сообщения, то проверить отработку команды можно:
+echo $?
+Ты должен увидеть:
+0
+
+Если ругается на iso_checksum_type
+Функция для исправления конфигурационного файла:
+packer fix debian9-config.json > debian9-config.json.new
+mv debian9-config.json.new debian9-config.json
+
+Теперь запускай сборку:
+packer build -force -var 'version=1.2.0' debian9-config.json
+
+Открываем VirtualBox и наблюдаем магию сборки.
+
+СОБИРАЕМ ОБРАЗ В GOOGLE CLOUD PLATFORM
+
+Регистрируем аккаунт в Google Cloud Platform
+https://accounts.google.com/sigNup
+-Привязываем карту и номер телефона
+
+Устанавливаем ansible:
+https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
+Доки по удаленным провайдерам packer:
+https://www.packer.io/docs/provisioners
+
+Готовим 4 файла:
+main.yml
+vars.json
+template.json
+account.json
+
+Открой файл vars.json в любом редакторе, там есть строка:
+"product_images_project_id": "premium-student-269809"
+
+Переменная zone:
+https://cloud.google.com/compute/docs/regions-zones
+
+account.json генрируется в GCP:
+
+Ссылка на packer какие роли нужны в GCP:
+https://packer.io/docs/builders/googlecompute.html#running-without-a-compute-engine-service-account
+
+Добавить роль, так при создании машины будет ругаться из-за прав. Но этот вопрос хорошо гуглиться.
+https://stackoverflow.com/questions/48232189/google-compute-engine-required-compute-zones-get-permission-error
+Также может возникнуть вопрос по ресурсам в зоне:
+https://stackoverflow.com/questions/52586941/got-an-error-zone-resource-pool-exhausted-when-creating-a-new-instance-on-goog
+Тогда проще сменить зону.
+
+введи команду:
+packer validate -var-file=vars.json template.json
